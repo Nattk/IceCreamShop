@@ -59,7 +59,15 @@ test("Order phases fro happy path", async () => {
   userEvent.click(checkbox);
   userEvent.click(summaryOrderButton);
   //Confirm Order number on confirmation page
-  const orderNumber = await screen.findByText("Your order number is : 0000001");
+  const loading = screen.getByText("Loading...");
+  expect(loading).toBeInTheDocument();
+
+  const orderNumber = await screen.findByText(
+    "Your order number is : 100048048"
+  );
+  const loadingAsync = screen.queryByText("Loading...");
+  expect(loadingAsync).not.toBeInTheDocument();
+
   expect(orderNumber).toBeInTheDocument();
 
   //click "new order" button on confirmation page
@@ -78,4 +86,50 @@ test("Order phases fro happy path", async () => {
   });
   expect(scoopsSubtotal).toHaveTextContent("0.00");
   expect(toppingsSubtotal).toHaveTextContent("0.00");
+});
+
+test("Toppings not showing in Order Summary if none selected", async () => {
+  //render app
+  render(<App />);
+  //add ice cream scoops and toppings
+  const scoops = await screen.findAllByRole("spinbutton");
+
+  userEvent.clear(scoops[0]);
+  userEvent.clear(scoops[1]);
+
+  userEvent.type(scoops[0], "1");
+  userEvent.type(scoops[1], "2");
+
+  //find and click order button
+  const orderButton = screen.getByRole("button", {
+    name: "Order your ice cream",
+  });
+  userEvent.click(orderButton);
+  const orderSummaryHeading = screen.getByRole("heading", {
+    name: "Order Summary",
+  });
+  expect(orderSummaryHeading).toBeInTheDocument();
+  expect(scoops[0]).not.toBeInTheDocument();
+
+  //Check Summary informations
+  const scoopChocolate = await screen.findByText("Chocolate x1", {
+    exact: true,
+  });
+  const scoopVanilla = await screen.findByText("Vanilla x2", {
+    exact: true,
+  });
+  const toppingsHeading = screen.queryByRole("heading", { name: "Toppings" });
+  expect(toppingsHeading).not.toBeInTheDocument();
+
+  expect(scoopChocolate).toBeInTheDocument();
+  expect(scoopVanilla).toBeInTheDocument();
+
+  const checkbox = await screen.findByRole("checkbox", {
+    name: "I agree to Terms and Conditions",
+  });
+  const summaryOrderButton = await screen.findByRole("button", {
+    name: "Confirm order",
+  });
+  expect(checkbox).toBeInTheDocument();
+  expect(summaryOrderButton).toBeInTheDocument();
 });
