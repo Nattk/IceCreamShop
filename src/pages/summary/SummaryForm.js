@@ -1,7 +1,7 @@
 import { Fragment, useState } from "react";
 import { Popover, OverlayTrigger } from "react-bootstrap";
 
-const SummaryForm = () => {
+const SummaryForm = ({ phaseClick }) => {
   const [btnSwitch, setBtnSwitch] = useState(false);
 
   const popover = (
@@ -29,7 +29,12 @@ const SummaryForm = () => {
           setBtnSwitch(e.target.checked);
         }}
       />
-      <button disabled={!btnSwitch}>Confirm order</button>
+      <button
+        onClick={() => phaseClick("order confirmation")}
+        disabled={!btnSwitch}
+      >
+        Confirm order
+      </button>
     </Fragment>
   );
 };
